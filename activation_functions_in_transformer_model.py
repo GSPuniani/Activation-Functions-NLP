@@ -147,6 +147,12 @@ class TACT(nn.Module):
         '''
         return f_tact(input, alpha = self.alpha, beta = self.beta, inplace = self.inplace)
 
+
+# If the list of devices is not specified in the
+# `tf.distribute.MirroredStrategy` constructor, it will be auto-detected.
+strategy = tf.distribute.MirroredStrategy()
+print('Number of devices: {}'.format(strategy.num_replicas_in_sync))
+
 # !pip install datasets
 
 from datasets import load_dataset
@@ -370,16 +376,24 @@ def bert_encode(data,maximum_length) :
       attention_masks.append(encoded['attention_mask'])
   return np.array(input_ids),np.array(attention_masks)
 
-print(raw_datasets['train'])
+# print(raw_datasets['train'])
 
-len(raw_datasets["train"])
+# len(raw_datasets["train"])
 
 
 
 MAX_LENGTH = 512
 
-train_input_ids, train_attention_masks = bert_encode(raw_datasets["train"][:1000], MAX_LENGTH)
-test_input_ids, test_attention_masks = bert_encode(raw_datasets["test"][:1000], MAX_LENGTH)
+
+BUFFER_SIZE = 1000
+
+BATCH_SIZE_PER_REPLICA = 64
+BATCH_SIZE = BATCH_SIZE_PER_REPLICA * strategy.num_replicas_in_sync
+
+# train_input_ids, train_attention_masks = bert_encode(raw_datasets["train"][:1000], MAX_LENGTH)
+# test_input_ids, test_attention_masks = bert_encode(raw_datasets["test"][:1000], MAX_LENGTH)
+train_input_ids, train_attention_masks = bert_encode(raw_datasets["train"][:1000], MAX_LENGTH).cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
+test_input_ids, test_attention_masks = bert_encode(raw_datasets["test"][:1000], MAX_LENGTH).batch(BATCH_SIZE)
 
 import tensorflow as tf
 from tensorflow.keras.optimizers import Adam
@@ -393,11 +407,12 @@ def create_model(bert_model):
   output = tf.keras.layers.Dropout(0.2)(output)
 
   output = tf.keras.layers.Dense(1,activation='sigmoid')(output)
-  model = tf.keras.models.Model(inputs = [input_ids,attention_masks],outputs = output)
+  model = tf.keras.models.Model(inputs = [input_ids,attention_masks], outputs = output)
   model.compile(Adam(lr=6e-6), loss='binary_crossentropy', metrics=['accuracy'])
   return model
 
-model = create_model(bert_model)
+with strategy.scope():
+    model = create_model(bert_model)
 model.summary()
 
 
