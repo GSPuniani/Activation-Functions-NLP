@@ -1,5 +1,3 @@
-
-
 """---
 
 # NEW APPROACH
@@ -33,14 +31,14 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim import SGD,Adam,lr_scheduler
 from torch.utils.data import random_split
-import torchvision
-from torchvision import transforms, datasets
+# import torchvision
+# from torchvision import transforms, datasets
 from torch.utils.data import DataLoader
 from torch.nn.parameter import Parameter
 
 import datasets
 import transformers
-
+import tensorflow as tf
 
 """## Custom Activation Functions"""
 
@@ -395,7 +393,7 @@ BATCH_SIZE = BATCH_SIZE_PER_REPLICA * strategy.num_replicas_in_sync
 train_input_ids, train_attention_masks = bert_encode(raw_datasets["train"][:1000], MAX_LENGTH).cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
 test_input_ids, test_attention_masks = bert_encode(raw_datasets["test"][:1000], MAX_LENGTH).batch(BATCH_SIZE)
 
-import tensorflow as tf
+
 from tensorflow.keras.optimizers import Adam
 def create_model(bert_model):
   input_ids = tf.keras.Input(shape=(MAX_LENGTH,),dtype='int32')
