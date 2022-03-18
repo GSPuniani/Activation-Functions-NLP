@@ -28,4 +28,4 @@ Feel free to experiment with the different activation functions for yourself by 
 
 ## GPT-2
 
-The submodules use variations of the GPT-2 architecture. The dataset is a different movie review dataset than the IMDb one used for BERT testing: SST-5 (Stanford Sentiment Treebank).
+The submodules use variations of the GPT-2 architecture. The dataset is a different movie review dataset than the IMDb one used for BERT testing: SST-5 (Stanford Sentiment Treebank). Each submodule has its own set of instructions in their respective directories.
