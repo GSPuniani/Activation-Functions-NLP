@@ -390,7 +390,7 @@ BATCH_SIZE = BATCH_SIZE_PER_REPLICA * strategy.num_replicas_in_sync
 
 # train_input_ids, train_attention_masks = bert_encode(raw_datasets["train"][:1000], MAX_LENGTH)
 # test_input_ids, test_attention_masks = bert_encode(raw_datasets["test"][:1000], MAX_LENGTH)
-train_input_ids, train_attention_masks = bert_encode(raw_datasets["train"][:1000], MAX_LENGTH).cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
+train_input_ids, train_attention_masks = tf.data.Dataset(bert_encode(raw_datasets["train"][:1000], MAX_LENGTH)).cache().shuffle(BUFFER_SIZE).batch(BATCH_SIZE)
 test_input_ids, test_attention_masks = bert_encode(raw_datasets["test"][:1000], MAX_LENGTH).batch(BATCH_SIZE)
 
 
